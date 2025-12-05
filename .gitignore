@@ -1,4 +1,5 @@
 .DS_Store
+environment.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
