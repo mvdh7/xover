@@ -10,6 +10,26 @@ from scipy.stats import t as t_dist
 
 jax.config.update("jax_enable_x64", True)
 
+# namedtuples for function results
+FurthestFirstSteps = namedtuple(
+    "FurthestFirstSteps",
+    ("index", "adjustment", "uncertainty"),
+)
+FurthestFirstResult = namedtuple(
+    "FurthestFirstResult",
+    (
+        "adjustments",
+        "uncertainties",
+        "steps",
+        "xovers_adjusted",
+        "weights",
+        "allowed",
+        "dof",
+        "t_crit",
+        "niter",
+    ),
+)
+
 
 def rms(values, **kwargs):
     """Calculate the root-mean-square of a set of values.
@@ -375,28 +395,10 @@ def furthest_first(
     adjustments, steps = scan(scan_ff, adjustments, length=niter)
     xovers_adjusted = adjust_xovers(xovers, adjustments)
     # Package up outputs
-    FurthestFirstSteps = namedtuple(
-        "FurthestFirstSteps",
-        ("index", "adjustment", "uncertainty"),
-    )
     steps = FurthestFirstSteps(
         onp.array(steps[0].astype(int)),
         onp.array(steps[1]),
         onp.array(steps[2]),
-    )
-    FurthestFirstResult = namedtuple(
-        "FurthestFirstResult",
-        (
-            "adjustments",
-            "uncertainties",
-            "steps",
-            "xovers_adjusted",
-            "weights",
-            "allowed",
-            "dof",
-            "t_crit",
-            "niter",
-        ),
     )
     ffr = FurthestFirstResult(
         onp.array(adjustments),
