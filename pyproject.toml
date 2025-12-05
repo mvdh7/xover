@@ -1,0 +1,46 @@
+[build-system]
+requires = [
+    "setuptools",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xover"
+description = "Crossover analysis tools for GLODAP"
+readme = "README.md"
+classifiers =[
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Oceanography",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+    "jax",
+    "scipy",
+    "statsmodels",
+]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+include = ["xover*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "xover.meta.__version__"}
+
+[too.ruff]
+line-length = 79
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-single-line = false
+lines-after-imports = 2
