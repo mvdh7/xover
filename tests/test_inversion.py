@@ -20,6 +20,7 @@ swt = xinv.sem_weighted_t(xovers, weights, offsets, dof, t_crit)
 unc = xinv.offset_uncertainties(xovers, weights, offsets, dof, t_crit)
 ff = xinv.furthest_first(xovers)
 ff_weights = xinv.furthest_first(xovers, weights=weights)
+trends = xinv.get_trends_wls(xovers, weights, dates)
 
 
 def test_offsets_weighted():
@@ -47,6 +48,17 @@ def test_offset_uncertainties():
     assert unc.shape == (xovers.shape[0],)
     assert not np.isinf(unc).any()
     assert not np.isnan(unc).any()
+
+
+def test_trends():
+    assert isinstance(trends, xinv.TrendsWLS)
+    assert (
+        trends.intercept.shape
+        == trends.slope.shape
+        == trends.slope_se.shape
+        == (xovers.shape[0],)
+    )
+    assert np.all(trends.slope[np.isnan(trends.slope_se)] == 0)
 
 
 def test_furthest_first():
@@ -146,6 +158,20 @@ def test_consistent_values():
     assert np.isclose(
         ff_weights.uncertainties.mean(), 0.6905165969831086, **isclose
     )
+    # trends_wls
+    assert np.isclose(trends.slope[0], 0.03493679817827933, **isclose)
+    assert np.isclose(trends.slope[-1], 0.15093132912539575, **isclose)
+    assert np.isclose(trends.slope.mean(), 0.07313471170123866, **isclose)
+    assert np.isnan(trends.slope_se).sum() == 40
+
+
+def test_at_step():
+    niter = 100
+    ff_niter = xinv.furthest_first(xovers, niter=niter)
+    adj_niter = xinv.adjustments_at_step(ff, step=niter)
+    unc_niter = xinv.uncertainties_at_step(ff, step=niter)
+    assert np.allclose(adj_niter, ff_niter.adjustments, **isclose)
+    assert np.allclose(unc_niter, ff_niter.uncertainties, **isclose)
 
 
 # test_offsets_weighted()
@@ -153,7 +179,9 @@ def test_consistent_values():
 # test_t_crit()
 # test_sem_weighted_t()
 # test_offset_uncertainties()
+# test_trends()
 # test_furthest_first()
 # test_furthest_first_niter()
 # test_furthest_first_weights()
 # test_consistent_values()
+# test_at_step()

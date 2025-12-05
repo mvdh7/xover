@@ -29,6 +29,7 @@ FurthestFirstResult = namedtuple(
         "niter",
     ),
 )
+TrendsWLS = namedtuple("TrendsWLS", ("intercept", "slope", "slope_se"))
 
 
 def rms(values, **kwargs):
@@ -271,15 +272,56 @@ def offset_uncertainties(xovers, weights, offsets, dof, t_crit):
     return offsets_u
 
 
-def get_trends_wls(xovers, weights, dates):
-    """Calculate weighted least squares trends."""
+def get_trends_wls(xovers, weights, dates, min_xovers=3):
+    """Calculate weighted least squares trends in crossovers.
+
+    A minimum number of crossovers must be available in order to calculate each
+    trend, otherwise zero is returned.
+
+    Parameters
+    ----------
+    xovers : np.array
+        A square `(n, n)` matrix of the crossover differences, where `n` is the
+        total number of cruises being compared.  `xovers[i, j]` contains the
+        crossover difference for cruise `i` - cruise `j`, or zero if there is
+        no crossover for that pair.
+    weights : np.array
+        A square `(n, n)` matrix of the crossover weights.  `weights[i, j]`
+        contains the weight for the corresponding crossover, and should be set
+        to zero where there are no crossovers and along the main diagonal.
+    dates : np.array
+        A square `(n, n)` matrix of the difference in time between crossover
+        pairs, in decimal years.  `dates[i, j]` contains the date difference
+        for cruise `i` - cruise `j`, or zero if there is no crossover for that
+        pair.
+    min_xovers : int, optional
+        The minimum number of crossovers required to calculate each trend, by
+        default 3.  The number of crossovers is determined from where the
+        `weights` are non-zero.
+
+    Returns
+    -------
+    TrendsWLS
+        A namedtuple with the following fields:
+            intercept : np.array
+                A size `(n,)` array of the y-axis intercept value for each
+                trend, in the unit of `xovers`.
+            slope : np.array
+                A size `(n,)` array of the trends, in `xovers` unit per year.
+                Value is zero where no trend could be computed due to
+                insufficient crossovers.
+            slope_se : np.array
+                A size `(n,)` array of the standard error in the trends, in
+                `xovers` unit per year.  Value is `np.nan` where no trend could
+                be computed due to insufficient crossovers.
+    """
     offsets = offsets_weighted(xovers, weights)
     intercept = onp.zeros(offsets.shape)
     slope = onp.zeros(offsets.shape)
     slope_se = onp.zeros(offsets.shape)
     for i in range(offsets.size):
         L = weights[i] > 0
-        if L.sum() >= 3:
+        if L.sum() >= min_xovers:
             wls = sm.WLS(
                 onp.array(xovers[i][L]),
                 sm.add_constant(dates[i][L]),
@@ -291,7 +333,6 @@ def get_trends_wls(xovers, weights, dates):
             intercept[i] = offsets[i]
             slope[i] = 0
             slope_se[i] = np.nan
-    TrendsWLS = namedtuple("TrendsWLS", ("intercept", "slope", "slope_se"))
     return TrendsWLS(intercept, slope, slope_se)
 
 
@@ -327,7 +368,9 @@ def furthest_first(
         A square `(n, n)` matrix of the crossover weights.  `weights[i, j]`
         contains the weight for the corresponding crossover, and should be set
         to zero where there are no crossovers and along the main diagonal.
-        If not provided, all crossovers are weighted equally.
+        If not provided, all crossovers are weighted equally, noting that every
+        non-NaN element of the crossover matrix is considered to represent a
+        crossover, including zero values.
 
     Returns
     -------
@@ -427,6 +470,21 @@ def furthest_first(
 
 
 def adjustments_at_step(ffr, step=None):
+    """Calculate the set of adjustments at a specific iteration step.
+
+    Parameters
+    ----------
+    ffr : FurthestFirstResult
+        Output from `furthest_first`.
+    step : int, optional
+        Which iteration step to calculate adjustments at, by default `None`,
+        in which case the final step is calculated.
+
+    Returns
+    -------
+    np.array
+        The set of adjustments at the requested iteration `step`.
+    """
     if step is None:
         step = ffr.niter
 
@@ -441,6 +499,21 @@ def adjustments_at_step(ffr, step=None):
 
 
 def uncertainties_at_step(ffr, step=None):
+    """Calculate the adjustment uncertainties at a specific iteration step.
+
+    Parameters
+    ----------
+    ffr : FurthestFirstResult
+        Output from `furthest_first`.
+    step : int, optional
+        Which iteration step to calculate uncertainties at, by default `None`,
+        in which case the final step is calculated.
+
+    Returns
+    -------
+    np.array
+        The set of adjustment uncertainties at the requested iteration `step`.
+    """
     if step is None:
         step = ffr.niter
 
