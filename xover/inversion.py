@@ -24,7 +24,9 @@ def rms_weighted(values, weights, **kwargs):
 
     Additional `kwargs` are passed on to `np.sum`.
     """
-    return np.sqrt(np.sum(weights * values**2, **kwargs) / np.sum(weights, **kwargs))
+    return np.sqrt(
+        np.sum(weights * values**2, **kwargs) / np.sum(weights, **kwargs)
+    )
 
 
 def adjust_xovers(xovers, adjustments):
@@ -347,7 +349,9 @@ def furthest_first(
         offsets = offsets_weighted(xovers_adj, weights)
         # Calculate offset uncertainties, assigning a value for cruises that
         # have only one offset
-        offsets_u = offset_uncertainties(xovers_adj, weights, offsets, dof, t_crit)
+        offsets_u = offset_uncertainties(
+            xovers_adj, weights, offsets, dof, t_crit
+        )
         # Determine which cruise is to be adjusted
         offsets_norm = np.abs(offsets / offsets_u)
         a = np.argmax(allowed * offsets_norm)

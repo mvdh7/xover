@@ -37,7 +37,7 @@ include = ["xover*"]
 [tool.setuptools.dynamic]
 version = {attr = "xover.meta.__version__"}
 
-[too.ruff]
+[tool.ruff]
 line-length = 79
 
 [tool.ruff.lint.isort]
