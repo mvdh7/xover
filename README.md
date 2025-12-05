@@ -11,6 +11,8 @@
     pip install xover
     conda install conda-forge::xover
 
+On Windows, you need to use `pip`, not `conda`!
+
 ## Use
 
 The current version of xover does not contain code for running an initial crossover analysis, but rather for doing the inversion to find a set of suggested adjustments for a given network of crossovers, using the furthest-first approach (new for GLODAP v3; earlier versions used a different method).
@@ -28,3 +30,4 @@ Consult the function docstring for more information about the format of `xovers`
 ## Version 1 (MATLAB)
 
 Version 1 of xover contained some tools for performing the initial crossover analysis in MATLAB.  The code can be found in the [matlab](https://github.com/mvdh7/xover/tree/matlab) branch, on the [v1.0 release](https://github.com/mvdh7/xover/releases/tag/v1.0) and/or on Zenodo with the DOI [10.5281/zenodo.2600229](https://doi.org/10.5281/zenodo.2600229).
+
