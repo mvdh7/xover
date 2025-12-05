@@ -1,0 +1,12 @@
+{
+    "description": "Crossover analysis tools for GLODAP",
+    "license": "GPL-3.0-only",
+    "title": "xover: crossover analysis tools for GLODAP",
+    "creators": [
+        {
+            "affiliation": "NIOZ Royal Netherlands Institute for Sea Research, Texel, the Netherlands",
+            "name": "Humphreys, Matthew P.",
+            "orcid": "0000-0002-9371-7128"
+        }
+    ]
+}
